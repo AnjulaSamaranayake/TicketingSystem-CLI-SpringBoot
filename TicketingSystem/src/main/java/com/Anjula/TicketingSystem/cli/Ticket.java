@@ -11,6 +11,9 @@ public class Ticket {
         this.ticketPrice = ticketPrice;
     }
 
+    public Ticket() {
+    }
+
     public int getTicketID() {
         return ticketID;
     }

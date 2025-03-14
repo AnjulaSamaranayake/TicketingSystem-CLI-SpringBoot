@@ -15,9 +15,28 @@ public class TicketPool {
         this.totalTicketsAvailable = totalTickets;
     }
 
-    //Add Ticket method which is used by Vendors to add tickets
-    public synchronized void addTickets(Ticket ticket) {
 
+    //Buy ticket method is used by Customer when buying Tickets
+    public synchronized Ticket retrieveTicket() {
+        while (this.tickets.isEmpty()) {
+            try{
+                System.out.println(Thread.currentThread().getName() + " waiting for retrieve tickets..");
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Thread interrupted while retrieving tickets. "+e.getMessage());
+            }
+        }
+
+        Ticket ticket = tickets.poll(); //Remove ticket from the queue (front)
+        // Print the message to show the thread name who bought the ticket and current size of the pool
+        System.out.println(Thread.currentThread().getName() + " has bought a ticket from the pool. Current size is " + this.tickets.size());
+        notifyAll();
+
+        return ticket;
+    }
+    //Add Ticket method which is used by Vendors to add tickets
+    public void addTicket(Ticket ticket) {
         try {
             // Wait if pool is at full
             while (tickets.size() >= maximumCapacity) {
@@ -41,25 +60,6 @@ public class TicketPool {
             Thread.currentThread().interrupt();
             System.err.println("Thread interrupted while releasing tickets. " +e.getMessage());
         }
-    }
 
-    //Buy ticket method is used by Customer when buying Tickets
-    public synchronized Ticket retrieveTicket() {
-        while (this.tickets.isEmpty()) {
-            try{
-                System.out.println(Thread.currentThread().getName() + " waiting for retrieve tickets..");
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.err.println("Thread interrupted while retrieving tickets. "+e.getMessage());
-            }
-        }
-
-        Ticket ticket = tickets.poll(); //Remove ticket from the queue (front)
-        // Print the message to show the thread name who bought the ticket and current size of the pool
-        System.out.println(Thread.currentThread().getName() + " has bought a ticket from the pool. Current size is " + this.tickets.size());
-        notifyAll();
-
-        return ticket;
     }
 }
